@@ -1,0 +1,766 @@
+			1. TEME SA OBUKE ORACLE SQL
+			---------------------------
+
+- baze podataka (DB, DBMS)
+	- hijerarhijske: prvi se pojavio IBM Information MS 1968.
+        - mrežne: CODASYL standard 1971., Total, Ida baza = Total
+	- relacijske (Oracle 1979., IBM 1982.)
+	- objektne
+	- objektno-relacijske (SQL 1999. standard)
+
+- relacijske baze
+	- Codd 1970
+	- IBM projekt System R 1974.
+	- IBM SEQUEL -> SQL
+
+- relacije (tablice)
+	- funkcija i relacija
+	- struktura (shema) tablice i sadržaj
+	- domene (ne podržavaju se u veæini baza),
+	- retci (instance tablice), atributi, stupci
+	- operacije
+		- skupovne: unija, presjek, razlika, kartezijev produkt
+		- relacijske algebre: izbor, projekcija, spajanje, dijeljenje
+	- 12 pravila (zapravo, od 0 do 12 = 13 pravila)
+
+- entiteti-veze
+	- grafièki jezik za definiranje strukture podataka - ne i operacija
+	- Chen 1976
+	- varijante (Chen, uobièajena, Oracle)
+
+- normalizacija podataka
+
+- SQL+
+
+- kreiranje tablica (CREATE TABLE)
+
+- tipovi podataka
+
+- jednostavna SELECT naredba (SELECT * FROM tablica WHERE uvjet ORDER BY polje)
+
+- jednostavni DML
+
+- upravljanje transakcijama (COMMIT, ROLLBACK, SAVEPOINT, ROLLBACK TO SAVEPOINT)
+
+- naèin zakljuèavanja slogova (implicitno ili SELECT ... FOR UPDATE)
+
+- integritet: PK, UK, FK, CK i NOT NULL (kao specifièan CK)
+
+- složeni upiti: join, subquery, zbirni upiti
+	- kartezijev produkt
+	- JOIN po jednakosti (najèešæe FK djeteta sa PK/UK roditelja)
+	- OUTER JOIN
+	- agregatne funkcije (SUM, COUNT, MIN, MAX)
+	- grupiranje i uvjet na grupe (GROUP BY i HAVING)
+	- SQL funkcije SUBSTR i NVL
+	- SELECT unutar SELECT
+	- operatori IN, LIKE (posebno upotreba znaka %), EXISTS, BETWEEN
+
+- složeni DML
+
+- pogledi
+
+- Oracle rjeènik podataka (baze), posebno metatablice (zapravo, view-ovi)
+  DICT(IONARY), USER_OBJECTS, USER_CONSTRAINTS, USER_TRIGGERS i DBA_OBJECTS ...
+
+- enable/disable uvjeta integriteta (ALTER TABLE tab DISABLE/ENABLE CONSTRAINT con)
+
+- prava, role, sinonimi
+
+- rad sa NULL vrijednostima, IS (NOT) NULL i dr.
+
+- upotreba vlastite (PL/SQL) funkcije u SQL naredbi
+
+- osnovno o funkcijama, procedurama i paketima
+
+- IN, OUT i IN OUT parametri funkcija/procedura
+
+- poseban oblik SELECT naredbe za PL/SQL (SELECT stupac INTO varijabla_l ...)
+
+- objekti baze: tablice, indeksi, okidaèi, funkcije/procedure, sekvence ...
+
+- okidaèi baze
+
+- enable/disable okidaèa
+
+- poslovna pravila
+
+- replikacija
+
+
+
+
+				2. PRIMJERI
+				-----------
+
+
+Tablice su:
+
+REFERENTI
+KUPCI
+ARTIKLI
+NARUDŽBE
+STAVKE
+
+
+-- kupci i njihovi referenti
+SELECT kup.sifra,
+       kup.naziv,
+       ref.sifra,
+       ref.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id = ref.id
+ ORDER BY kup.sifra
+/
+
+-- kupci i njihovi referenti - SQL 3 standard (>= baza 9i)
+SELECT kup.sifra,
+       kup.naziv,
+       ref.sifra,
+       ref.naziv
+  FROM m_kupci kup JOIN m_referenti ref ON kup.ref_id = ref.id
+ ORDER BY kup.sifra
+/
+
+-- kupci i njihovi referenti - SQL 3 standard (>= baza 9i) - može i sa zagradama
+SELECT kup.sifra,
+       kup.naziv,
+       ref.sifra,
+       ref.naziv
+  FROM m_kupci kup JOIN m_referenti ref ON (kup.ref_id = ref.id)
+ ORDER BY kup.sifra
+/
+
+-- referenti (koji imaju kupce) i njihovi kupci
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra
+/
+
+-- referenti (i oni koji nemaju kupce) i njihovi kupci
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id (+) = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra
+/
+
+-- referenti (i oni koji nemaju kupce) i njihovi kupci - SQL 3 standard (>= baza 9i)
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_referenti ref LEFT JOIN m_kupci kup ON ref.id = kup.ref_id
+ ORDER BY
+       ref.sifra,
+       kup.sifra
+/
+
+-- referenti (i oni koji nemaju kupce) i njihovi kupci - SQL 3 standard (>= baza 9i)
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci kup RIGHT JOIN m_referenti ref ON kup.ref_id = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra
+/
+
+-- referenti (i oni koji nemaju kupce) i kupci (i oni bez referenata)
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id (+) = ref.id
+UNION
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id = ref.id (+)
+ ORDER BY 1, 3
+/
+
+
+-- referenti (i oni koji nemaju kupce) i kupci (i oni bez referenata) - SQL 3 standard (>= baza 9i)
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv
+  FROM m_kupci kup FULL JOIN m_referenti ref ON (kup.ref_id = ref.id)
+ ORDER BY
+       ref.sifra,
+       kup.sifra
+/
+
+-- narudžbe i kupci
+SELECT nar.broj,
+       nar.datum,
+       kup.sifra,
+       kup.naziv
+  FROM t_narudzbe nar,
+       m_kupci    kup
+ WHERE nar.kup_id = kup.id
+ ORDER BY nar.broj
+/
+
+-- kupci (koji imaju narudzbe) i njihove narudzbe
+SELECT kup.sifra,
+       kup.naziv,
+       nar.broj,
+       nar.datum
+  FROM t_narudzbe nar,
+       m_kupci    kup
+ WHERE nar.kup_id = kup.id
+ ORDER BY
+       kup.sifra,
+       nar.broj
+/
+
+-- referenti (koji imaju kupce) i njihovi kupci (koji imaju narudzbe) i njihove narudzbe
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv,
+       nar.broj,
+       nar.datum
+  FROM t_narudzbe  nar,
+       m_kupci     kup,
+       m_referenti ref
+ WHERE nar.kup_id = kup.id
+   AND kup.ref_id = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra,
+       nar.broj
+/
+
+-- referenti (koji imaju kupce)
+-- i njihovi kupci (i oni koji nemaju narudzbe) i njihove narudzbe
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv,
+       nar.broj,
+       nar.datum
+  FROM t_narudzbe  nar,
+       m_kupci     kup,
+       m_referenti ref
+ WHERE nar.kup_id (+) = kup.id
+   AND kup.ref_id     = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra,
+       nar.broj
+/
+
+-- referenti (i oni koji nemaju kupce)
+-- i njihovi kupci (i oni koji nemaju narudzbe) i njihove narudzbe
+SELECT ref.sifra,
+       ref.naziv,
+       kup.sifra,
+       kup.naziv,
+       nar.broj,
+       nar.datum
+  FROM t_narudzbe  nar,
+       m_kupci     kup,
+       m_referenti ref
+ WHERE nar.kup_id (+) = kup.id
+   AND kup.ref_id (+) = ref.id
+ ORDER BY
+       ref.sifra,
+       kup.sifra,
+       nar.broj
+/
+
+-- broj narudžbi
+SELECT COUNT (*)
+  FROM t_narudzbe
+/
+
+-- referenti i broj pripadajuæih kupaca
+SELECT ref.sifra,
+       ref.naziv,
+       COUNT (kup.ref_id) broj_kupaca
+  FROM m_referenti ref,
+       m_kupci     kup
+ WHERE kup.ref_id (+) = ref.id
+ GROUP BY
+       ref.sifra,
+       ref.naziv
+ ORDER BY broj_kupaca DESC
+/
+
+-- referenti i broj pripadajuæih kupaca - netoèno za onog koji nema
+SELECT ref.sifra,
+       ref.naziv,
+       COUNT (*) broj_kupaca -- isto kao npr. COUNT (ref.sifra)
+  FROM m_referenti ref,
+       m_kupci     kup
+ WHERE kup.ref_id (+) = ref.id
+ GROUP BY
+       ref.sifra,
+       ref.naziv
+ ORDER BY broj_kupaca DESC
+/
+
+
+
+
+-- kupci (koji imaju narudzbe) i suma narudzbi
+SELECT kup.sifra,
+       kup.naziv,
+       SUM (narart.kolicina * narart.cijena) iznos
+  FROM t_narudzbe_art narart,
+       t_narudzbe     nar,
+       m_kupci        kup
+ WHERE narart.nar_id = nar.id
+   AND nar.kup_id    = kup.id
+ GROUP BY
+       kup.sifra,
+       kup.naziv
+/
+
+-- referenti (koji imaju kupce) i suma narudzbi
+SELECT ref.sifra,
+       ref.naziv,
+       SUM (narart.kolicina * narart.cijena) iznos
+  FROM t_narudzbe_art narart,
+       t_narudzbe     nar,
+       m_kupci        kup,
+       m_referenti    ref
+ WHERE narart.nar_id = nar.id
+   AND nar.kup_id    = kup.id
+   AND kup.ref_id    = ref.id
+ GROUP BY
+       ref.sifra,
+       ref.naziv
+/
+
+-- artikli (koji imaju stavke) i suma stavaka
+SELECT art.sifra,
+       art.naziv,
+       SUM (narart.kolicina * narart.cijena) iznos
+  FROM t_narudzbe_art narart,
+       m_artikli      art
+ WHERE narart.art_id = art.id
+ GROUP BY
+       art.sifra,
+       art.naziv
+/
+
+-- artikli (koji imaju stavke) i suma stavaka, ako je suma stavaka > 1000
+SELECT art.sifra,
+       art.naziv,
+       SUM (narart.kolicina * narart.cijena) iznos
+  FROM t_narudzbe_art narart,
+       m_artikli      art
+ WHERE narart.art_id = art.id
+ GROUP BY
+       art.sifra,
+       art.naziv
+HAVING SUM (narart.kolicina * narart.cijena) > 1000
+/
+
+-- kao prije, ali varijanta koja NAŽALOST NE RADI (u HAVING ne možemo koristiti alias)
+SELECT art.sifra,
+       art.naziv,
+       SUM (narart.kolicina * narart.cijena) iznos
+  FROM t_narudzbe_art narart,
+       m_artikli      art
+ WHERE narart.art_id = art.id
+ GROUP BY
+       art.sifra,
+       art.naziv
+HAVING iznos > 1000
+/
+
+-- na koje datume imamo narudžbe - bez duplih datuma
+SELECT DISTINCT datum
+  FROM t_narudzbe
+/
+
+-- kupci sa šiframa od 100 do 200
+SELECT *
+  FROM m_kupci
+ WHERE sifra BETWEEN '100' AND '200'
+/
+
+-- PAŽNJA - daje kupca 100, jer je šifra alfanumerik
+SELECT *
+  FROM m_kupci
+ WHERE sifra BETWEEN '10' AND '20'
+/
+
+-- kupci koji u nazivu imaju "2"
+SELECT *
+  FROM m_kupci
+ WHERE naziv LIKE '%2%'
+/
+
+-- kupci èiji naziv završava sa "2"
+SELECT *
+  FROM m_kupci
+ WHERE naziv LIKE '%2'
+/
+
+-- kupci koji u nazivu imaju "K"
+SELECT *
+  FROM m_kupci
+ WHERE naziv LIKE '%C%'
+/
+
+-- kupci koji u nazivu imaju "k" - nema
+SELECT *
+  FROM m_kupci
+ WHERE naziv LIKE '%c%'
+/
+
+-- UPPER - neovisno o podacima, ali sporije
+SELECT *
+  FROM m_kupci
+ WHERE UPPER (naziv) LIKE '%K%'
+/
+
+-- LOWER - neovisno o podacima, ali sporije
+SELECT *
+  FROM m_kupci
+ WHERE LOWER (naziv) LIKE '%k%'
+/
+
+-- prikaz dijela naziva
+SELECT sifra,
+       SUBSTR (naziv, 1, 5) dio_naziva
+  FROM m_kupci
+ ORDER BY sifra
+/
+
+-- referenti èija je šifra manja od maksimalne podijeljene sa 2
+SELECT sifra, naziv
+  FROM m_referenti
+ WHERE sifra * 2 < (SELECT MAX (sifra)
+                      FROM m_referenti)
+ ORDER BY sifra
+/
+
+-- ili
+SELECT sifra, naziv
+  FROM m_referenti
+ WHERE sifra < (SELECT MAX (sifra) / 2
+                  FROM m_referenti)
+ ORDER BY sifra
+/
+
+-- prosjeèan iznos stavke
+SELECT AVG (kolicina * cijena) pros_iznos_stavke
+  FROM t_narudzbe_art
+/
+
+-- prosjeèan iznos narudzbe
+SELECT (SELECT SUM (kolicina * cijena) pros_iznos_stavke FROM t_narudzbe_art)
+        /
+       (SELECT COUNT (*) FROM t_narudzbe)
+       pros_iznos_narudzbe
+  FROM DUAL
+/
+
+-- prosjeèan iznos narudzbe - 2. varijanta
+SELECT AVG (iznos_narudzbe) pros_iznos_narudzbe
+  FROM t_narudzbe nar,
+       (SELECT nar_id,
+               SUM (kolicina * cijena) iznos_narudzbe
+          FROM t_narudzbe_art
+         GROUP BY nar_id) suma_stav
+ WHERE nar.id = suma_stav.nar_id
+/
+
+-- stavi cijena = 30 svim stavkama referenta sa šifrom = 1
+UPDATE t_narudzbe_art
+   SET cijena = 30
+ WHERE nar_id IN (SELECT id
+                    FROM t_narudzbe
+                   WHERE kup_id IN (SELECT id
+                                      FROM m_kupci
+                                     WHERE ref_id IN (SELECT id
+                                                        FROM m_referenti
+                                                       WHERE sifra = '1')))
+/
+                                   
+-- stavi cijena = 30 svim stavkama referenta sa šifrom = 1; 2. varijanta
+UPDATE t_narudzbe_art
+   SET cijena = 30
+ WHERE nar_id IN (SELECT nar.id
+                    FROM t_narudzbe  nar,
+                         m_kupci     kup,
+                         m_referenti ref
+                   WHERE nar.kup_id = kup.id
+                     AND kup.ref_id = ref.id
+                     AND ref.sifra  = '1')
+/
+
+-- stavi cijena = 30 svim stavkama referenta sa šifrom = 1; 3. varijanta (korelirani podupit)
+UPDATE t_narudzbe_art narart
+   SET cijena = 30
+ WHERE EXISTS (SELECT 'nije vazno'
+                 FROM t_narudzbe  nar,
+                      m_kupci     kup,
+                      m_referenti ref
+                WHERE nar.id     = narart.nar_id -- korelacija
+                  AND nar.kup_id = kup.id
+                  AND kup.ref_id = ref.id
+                  AND ref.sifra  = '1')
+/
+
+CREATE OR REPLACE VIEW v_m_kupci (
+   kup_id,
+   kup_sifra,
+   kup_naziv,
+   kup_ref_id,
+   ref_sifra,
+   ref_naziv)
+AS
+SELECT kup.id,
+       kup.sifra,
+       kup.naziv,
+       kup.ref_id,
+       ref.sifra,
+       ref.naziv
+  FROM m_kupci     kup,
+       m_referenti ref
+ WHERE kup.ref_id = ref.id
+ -- ORDER BY kup.sifra -- NEÆE RADITI DML SA ORDER BY
+/
+
+-- referenti (koji imaju kupce)
+-- i njihovi kupci (i oni koji nemaju narudzbe) i njihove narudzbe
+SELECT vkup.ref_sifra,
+       vkup.ref_naziv,
+       vkup.kup_sifra,
+       vkup.kup_naziv,
+       nar.broj,
+       nar.datum
+  FROM t_narudzbe nar,
+       v_m_kupci  vkup
+ WHERE nar.kup_id (+) = vkup.kup_id
+ ORDER BY
+       vkup.ref_sifra,
+       vkup.kup_sifra,
+       nar.broj
+/
+
+-- koji stupci view-a "V_M_KUPCI" se mogu mijenjati
+SELECT *
+  FROM user_updatable_columns
+ WHERE table_name = 'V_M_KUPCI'
+/
+
+-- radi
+UPDATE v_m_kupci
+   SET kup_naziv = kup_naziv || ' DODATAK'
+/
+
+-- NE RADI - mijenja se stupac iz nebazne tablice (tablice roditelja)
+UPDATE v_m_kupci
+   SET ref_naziv = ref_naziv || ' DODATAK'
+/
+
+
+-- view - kolièina i iznos artikala po referentima (bez šifre i naziva referenta)
+CREATE OR REPLACE VIEW v_m_artikli_referenta (
+   kup_ref_id,
+   art_sifra,
+   art_naziv,
+   kolicina_artikla_referenta,
+   iznos_artikla_referenta)
+AS
+SELECT kup.ref_id,
+       art.sifra,
+       art.naziv,
+       SUM (narart.kolicina),
+       SUM (narart.kolicina * narart.cijena)
+  FROM t_narudzbe_art narart,
+       m_artikli      art,
+       t_narudzbe     nar,
+       m_kupci        kup
+ WHERE narart.art_id = art.id
+   AND narart.nar_id = nar.id
+   AND nar.kup_id    = kup.id
+ GROUP BY
+       kup.ref_id,
+       art.sifra,
+       art.naziv
+/
+
+-- koji stupci view-a "V_M_ARTIKLI_REFERENTA" se mogu mijenjati
+SELECT *
+  FROM user_updatable_columns
+ WHERE table_name = 'V_M_ARTIKLI_REFERENTA'
+/
+
+-- kolièina i iznos artikala po referentima - koristi se view
+SELECT ref.sifra,
+       ref.naziv,
+       vartref.art_sifra,
+       vartref.art_naziv,
+       vartref.kolicina_artikla_referenta,
+       vartref.iznos_artikla_referenta
+  FROM v_m_artikli_referenta vartref,
+       m_referenti           ref
+ WHERE vartref.kup_ref_id = ref.id
+ ORDER BY
+       ref.sifra,
+       vartref.art_sifra
+/
+
+
+-- kreiranje kopije tablice - sa podacima
+CREATE TABLE x_m_artikli AS
+   SELECT * FROM m_artikli
+/
+DROP TABLE x_m_artikli
+/
+
+-- kreiranje kopije tablice - bez podataka
+CREATE TABLE x_m_artikli AS
+   SELECT * FROM m_artikli WHERE 1 = 2
+/
+
+-- INSERT više redaka (pomoæu podupita)
+INSERT INTO x_m_artikli
+   SELECT * FROM m_artikli
+/
+
+
+-- HIJERARHIJSKI PODUPIT
+SELECT id, sifra, naziv, oj_id
+  FROM m_oj
+ START WITH id = &oj_vlasnik
+ CONNECT BY PRIOR id = oj_id
+ ORDER BY oj_id DESC
+/
+
+
+--JEDAN SLOŽENI PRIMJER IZ PRAKSE
+
+-- najkompliciranije - "èisti" SQL sa DECODE
+UPDATE m_sirovine centar
+   SET (zad_nab_cijena, dat_azur_nc) =
+       (SELECT DECODE (dat_azur_nc,
+                       NULL, centar.zad_nab_cijena,
+                       DECODE (centar.dat_azur_nc,
+                               NULL, zad_nab_cijena,
+                               DECODE (GREATEST (dat_azur_nc, centar.dat_azur_nc),
+                                       dat_azur_nc, zad_nab_cijena,
+                                       centar.zad_nab_cijena))),
+               DECODE (dat_azur_nc,
+                       NULL, centar.dat_azur_nc,
+                       DECODE (centar.dat_azur_nc,
+                               NULL, dat_azur_nc,
+                               GREATEST (centar.dat_azur_nc, dat_azur_nc)))
+          FROM m_sirovine@prehotel
+         WHERE id = centar.id)
+/
+
+-- samo malo manje komplicirano - "èisti" SQL sa CASE
+UPDATE m_sirovine centar
+   SET (zad_nab_cijena, dat_azur_nc) =
+       (SELECT CASE WHEN dat_azur_nc IS NULL THEN centar.zad_nab_cijena
+               ELSE CASE WHEN centar.dat_azur_nc IS NULL THEN zad_nab_cijena
+                    ELSE CASE WHEN dat_azur_nc > centar.dat_azur_nc THEN zad_nab_cijena
+                         ELSE centar.zad_nab_cijena
+                         END
+                    END
+               END,
+               CASE WHEN dat_azur_nc IS NULL THEN centar.dat_azur_nc
+               ELSE CASE WHEN centar.dat_azur_nc IS NULL THEN dat_azur_nc
+                    ELSE CASE WHEN dat_azur_nc > centar.dat_azur_nc THEN dat_azur_nc
+                         ELSE centar.dat_azur_nc
+                         END
+                    END
+               END
+          FROM m_sirovine@prehotel
+         WHERE id = centar.id)
+/
+
+-- puno jednostavnije i brže - PL/SQL
+DECLARE
+   dat_azur_nc_l m_sirovine.dat_azur_nc%TYPE;
+BEGIN
+   FOR objekt IN (
+      SELECT id, zad_nab_cijena, dat_azur_nc
+        FROM m_sirovine@prehotel
+       WHERE dat_azur_nc IS NOT NULL)
+   LOOP
+      SELECT dat_azur_nc INTO dat_azur_nc_l
+        FROM m_sirovine
+       WHERE id = objekt.id;
+
+      IF dat_azur_nc_l IS NULL OR dat_azur_nc_l < objekt.dat_azur_nc THEN
+         UPDATE m_sirovine
+            SET zad_nab_cijena = objekt.zad_nab_cijena,
+                dat_azur_nc    = objekt.dat_azur_nc
+          WHERE id = objekt.id;
+      END IF;
+   END LOOP;
+END;
+/
+
+
+
+
+SQL> desc grad
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID                                        NOT NULL NUMBER(10)
+ NAZIV                                     NOT NULL VARCHAR2(30)
+ DRZAVA                                    NOT NULL VARCHAR2(30)
+
+SQL> desc aerodrom
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID                                        NOT NULL NUMBER(10)
+ NAZIV                                     NOT NULL VARCHAR2(30)
+ ID_GRADA                                  NOT NULL NUMBER(10)
+
+SQL> UPDATE (SELECT a.id, a.naziv,
+  2                 g.id, g.drzava
+  3            FROM aerodrom a,
+  4                 grad g
+  5           WHERE a.id_grada = g.id
+  6         )
+  7     SET drzava = 'XX'
+  8  /
+   SET drzava = 'XX'
+       *
+ERROR at line 7:
+ORA-01779: cannot modify a column which maps to a non key-preserved table
+
+
+SQL> UPDATE (SELECT a.id, a.naziv,
+  2                 g.id, g.drzava
+  3            FROM aerodrom a,
+  4                 grad g
+  5           WHERE a.id_grada = g.id
+  6         )
+  7     SET naziv = naziv || 'XX'
+  8  /
+
+3 rows updated.

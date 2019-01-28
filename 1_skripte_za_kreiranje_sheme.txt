@@ -1,0 +1,217 @@
+-- OVO SE RADI KAO USER SYSTEM (ILI SLIÈAN)
+
+CREATE TABLESPACE obuka LOGGING
+  DATAFILE 'C:\app\oracle\oradata\oracle\obuka.ora'
+  SIZE 100M REUSE AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED
+  EXTENT MANAGEMENT LOCAL
+/
+
+
+ACCEPT shema PROMPT 'Unesite ime apl.sheme:'
+
+CREATE USER &shema IDENTIFIED BY obuka
+   DEFAULT TABLESPACE obuka
+/
+
+-- ***** Prava na vlastitoj shemi *****
+GRANT ALTER SESSION TO &shema;
+GRANT CREATE DATABASE LINK TO &shema;
+GRANT CREATE PROCEDURE TO &shema;
+GRANT CREATE SEQUENCE TO &shema;
+GRANT CREATE SESSION  TO &shema;
+GRANT CREATE SYNONYM TO &shema;
+GRANT CREATE TABLE TO &shema;
+GRANT CREATE TRIGGER TO &shema;
+GRANT CREATE TYPE TO &shema;
+GRANT CREATE VIEW TO &shema;
+
+ALTER USER &shema QUOTA UNLIMITED ON obuka;
+
+
+
+-- DALJE SE RADI KAO USER OBUKA
+
+CREATE SEQUENCE obuka_seq
+/
+
+
+CREATE FUNCTION sekvenca (id_p NUMBER) RETURN NUMBER IS
+  id_l NUMBER;
+BEGIN
+  IF id_p IS NOT NULL THEN
+    id_l := id_p;
+  ELSE
+    SELECT obuka_seq.NEXTVAL INTO id_l FROM DUAL;
+  END IF;
+
+  RETURN id_l;
+END;
+/
+
+
+CREATE TABLE M_ARTIKLI ( 
+  ID     NUMBER (8)    NOT NULL, 
+  SIFRA  VARCHAR2 (10)  NOT NULL, 
+  NAZIV  VARCHAR2 (40)  NOT NULL, 
+  CONSTRAINT ART_UK UNIQUE      (SIFRA) USING INDEX,
+  CONSTRAINT ART_PK PRIMARY KEY ( ID )  USING INDEX
+)
+/
+CREATE OR REPLACE TRIGGER BIR_M_ARTIKLI
+ BEFORE INSERT
+ ON M_ARTIKLI
+ FOR EACH ROW
+BEGIN
+  :NEW.id := sekvenca (:NEW.id);
+END;
+/
+
+
+CREATE TABLE M_REFERENTI ( 
+  ID     NUMBER (8)    NOT NULL, 
+  SIFRA  VARCHAR2 (10)  NOT NULL, 
+  NAZIV  VARCHAR2 (40)  NOT NULL, 
+  CONSTRAINT REF_UK UNIQUE (SIFRA) USING INDEX,
+  CONSTRAINT REF_PK PRIMARY KEY ( ID ) USING INDEX
+)
+/
+CREATE OR REPLACE TRIGGER BIR_M_REFERENTI
+ BEFORE INSERT
+ ON M_REFERENTI
+ FOR EACH ROW
+BEGIN
+  :NEW.id := sekvenca (:NEW.id);
+END;
+/
+
+
+CREATE TABLE M_KUPCI ( 
+  ID      NUMBER (8)    NOT NULL, 
+  SIFRA   VARCHAR2 (10)  NOT NULL, 
+  NAZIV   VARCHAR2 (40)  NOT NULL, 
+  REF_ID  NUMBER (8), --  NOT NULL, 
+  CONSTRAINT KUP_UK UNIQUE (SIFRA) USING INDEX,
+  CONSTRAINT KUP_PK PRIMARY KEY ( ID ) USING INDEX
+)
+/
+ALTER TABLE M_KUPCI ADD  CONSTRAINT KUP_REF_FK
+ FOREIGN KEY (REF_ID) 
+  REFERENCES M_REFERENTI (ID)
+/
+CREATE INDEX KUP_REF_FK_I ON 
+  M_KUPCI(REF_ID) 
+/
+CREATE OR REPLACE TRIGGER BIR_M_KUPCI
+ BEFORE INSERT
+ ON M_KUPCI
+ FOR EACH ROW
+BEGIN
+  :NEW.id := sekvenca (:NEW.id);
+END;
+/
+
+
+CREATE TABLE T_NARUDZBE ( 
+  ID      NUMBER (8)    NOT NULL, 
+  BROJ    VARCHAR2 (10)  NOT NULL, 
+  DATUM   DATE          NOT NULL, 
+  KUP_ID  NUMBER (8)    NOT NULL, 
+  CONSTRAINT NAR_UK UNIQUE (BROJ)    USING INDEX,
+  CONSTRAINT NAR_PK PRIMARY KEY ( ID ) USING INDEX
+)
+/
+ALTER TABLE T_NARUDZBE
+  ADD  CONSTRAINT NAR_KUP_FK FOREIGN KEY (KUP_ID) REFERENCES M_KUPCI (ID)
+/
+CREATE INDEX NAR_KUP_FK_I ON 
+  T_NARUDZBE(KUP_ID) 
+/
+CREATE OR REPLACE TRIGGER BIR_T_NARUDZBE
+ BEFORE INSERT
+ ON T_NARUDZBE
+ FOR EACH ROW
+BEGIN
+  :NEW.id := sekvenca (:NEW.id);
+END;
+/
+
+
+CREATE TABLE T_NARUDZBE_ART ( 
+  NAR_ID    NUMBER (8)    NOT NULL, 
+  ART_ID    NUMBER (8)    NOT NULL, 
+  KOLICINA  NUMBER (8)    NOT NULL, 
+  CIJENA    NUMBER (8,2)  NOT NULL, 
+  CONSTRAINT NARART_UK UNIQUE (NAR_ID, ART_ID) USING INDEX
+)
+/
+ALTER TABLE T_NARUDZBE_ART
+ ADD  CONSTRAINT NARART_ART_FK FOREIGN KEY (ART_ID) REFERENCES M_ARTIKLI (ID)
+/
+ALTER TABLE T_NARUDZBE_ART
+ ADD CONSTRAINT NARART_NAR_FK FOREIGN KEY (NAR_ID) REFERENCES T_NARUDZBE (ID)
+/
+CREATE INDEX NARART_ART_FK_I ON 
+  T_NARUDZBE_ART(ART_ID) 
+/
+
+--
+-- referenti
+--
+INSERT INTO m_referenti (id, sifra, naziv) VALUES (1, 1, 'REFERENT 1')
+/
+INSERT INTO m_referenti (id, sifra, naziv) VALUES (2, 2, 'REFERENT 2')
+/
+INSERT INTO m_referenti (id, sifra, naziv) VALUES (3, 3, 'REFERENT 3')
+/
+--
+-- kupci
+--
+INSERT INTO m_kupci (id, sifra, naziv, ref_id) VALUES (1, 1, 'KUPAC 1', 1)
+/
+INSERT INTO m_kupci (id, sifra, naziv, ref_id) VALUES (2, 2, 'KUPAC 2', 1)
+/
+INSERT INTO m_kupci (id, sifra, naziv, ref_id) VALUES (3, 3, 'KUPAC 3', 2)
+/
+INSERT INTO m_kupci (id, sifra, naziv, ref_id) VALUES (4, 4, 'KUPAC 4', 2)
+/
+INSERT INTO m_kupci (id, sifra, naziv, ref_id) VALUES (5, 5, 'KUPAC 5', NULL) -- bez referenta
+/
+--
+-- zaglavlja
+--
+INSERT INTO t_narudzbe (id, broj, datum, kup_id) VALUES (1, 'RBR1', '01.01.2008', 1)
+/
+INSERT INTO t_narudzbe (id, broj, datum, kup_id) VALUES (2, 'RBR2', '01.01.2008', 1)
+/
+INSERT INTO t_narudzbe (id, broj, datum, kup_id) VALUES (3, 'RBR3', '01.01.2008', 2)
+/
+INSERT INTO t_narudzbe (id, broj, datum, kup_id) VALUES (4, 'RBR4', '01.01.2008', 2)
+/
+INSERT INTO t_narudzbe (id, broj, datum, kup_id) VALUES (5, 'RBR5', '01.01.2008', 3)
+/
+--
+--artikli
+--
+INSERT INTO m_artikli (id, sifra, naziv) VALUES (1, 1, 'A1')
+/
+INSERT INTO m_artikli (id, sifra, naziv) VALUES (2, 2, 'A2')
+/
+INSERT INTO m_artikli (id, sifra, naziv) VALUES (3, 3, 'A3')
+/
+--
+-- stavke
+--
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (1, 1, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (1, 2, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (2, 1, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (2, 2, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (3, 1, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (4, 1, 10, 100)
+/
+INSERT INTO t_narudzbe_art (nar_id, art_id, kolicina, cijena) VALUES (5, 2, 10, 100)
+/

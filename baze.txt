@@ -1,0 +1,39 @@
+
+CONNECT SYSTEM/Emma
+CREATE TABLESPACE obuka LOGGING DATAFILE 'C:\oraclexe\app\oracle\oradata\XE\obuka.ora' 
+SIZE 100M REUSE AUTOEXTEND ON NEXT 10M MAXSIZE 
+UNLIMITED EXTENT MANAGEMENT LOCAL
+/
+
+ACCEPT shema PROMPT 'Unesite ime apl.sheme:'
+
+CREATE USER &shema IDENTIFIED BY &shema
+   DEFAULT TABLESPACE obuka
+/
+
+-- ***** Prava na vlastitoj shemi *****
+GRANT ALTER SESSION TO &shema;
+GRANT CREATE DATABASE LINK TO &shema;
+GRANT CREATE PROCEDURE TO &shema;
+GRANT CREATE SEQUENCE TO &shema;
+GRANT CREATE SESSION  TO &shema;
+GRANT CREATE SYNONYM TO &shema;
+GRANT CREATE TABLE TO &shema;
+GRANT CREATE TRIGGER TO &shema;
+GRANT CREATE TYPE TO &shema;
+GRANT CREATE VIEW TO &shema;
+
+ALTER USER &shema QUOTA UNLIMITED ON obuka;
+
+
+
+-- DALJE SE RADI KAO USER OBUKA
+
+CREATE SEQUENCE obuka_seq
+/
+
+probaj
+alter user &shema account unlock
+;
+i onda jos
+grant connect to &shema;

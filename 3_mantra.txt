@@ -1,0 +1,42 @@
+				"MANTRA"
+				-------
+
+
+1. Sesija (baze podataka) ne vidi promjene koje je napravila druga sesija,
+dok druga sesija ne napravi COMMIT (ili ROLLBACK).
+Meðutim, sesije nisu nezavisne, jer zakljuèavanje redaka u jednoj sesiji
+utjeèe na drugu sesiju koja pokušava ažurirati redak koji je zakljuèala prva sesija.
+
+2. Kada sesija izvršava DML naredbu (INSERT, UPDATE, DELETE), automatski se zakljuèa redak.
+Redak se može otkljuèati tek na kraju transakcije (COMMIT ili ROLLBACK), ili pomoæu
+ROLLBACK TO SAVEPOINT. Meðutim, redovi koji su otkljuèani sa ROLLBACK TO SAVEPOINT
+ostaju zakljuèani za one sesije koje su veæ prije toga pokušale izvršiti DML na tim
+redovima.
+Redovi se mogu zakljuèati i sa SELECT ... FOR UPDATE. Pritom postoji i opcija NOWAIT / WAIT
+(SELECT ... FOR UPDATE NOWAIT). DML naredbe nemaju opciju NOWAIT - uvijek moraju èekati
+dok se redak ne otkljuèa.
+Može se zakljuèati i cijela tablica, sa LOCK TABLE ... NOWAIT
+
+
+3. Transakcija može ili u cijelosti uspjeti (COMMIT), ili se u cijelosti poništiti (ROLLBACK).
+Naravno, ne znaèi da sve DML radnje unutar transakcije moraju uspjeti,
+jer one DML radnje koje su uzrokovale grešku, ali je greška obraðena, neæe uspjeti.
+
+
+4. DML naredba može ili u cijelosti uspjeti ili se njen efekat u cijelosti poništava.
+Pritom se mogu desiti tri tipa grešaka:
+- narušen uvjet na tip stupca - npr. u NUMBER (2) pokušali smo upisati broj 1000
+- narušeno deklarativno integritetno ogranièenje (PK, UK, FK, CK, NOT NULL);
+zapravo provjera deklarativnih ogranièenja može se i odgoditi (najkasnije do COMMIT) -
+tada naredba može uspjeti i ako deklarativna ogranièenja nisu zadovoljena
+- narušena proceduralna ogranièenja (okidaèi baze) - to je najkompliciraniji sluèaj, jer npr.
+jedna UPDATE naredba može okinuti razlièite UPDATE okidaèe, koji mogu pozivati procedure
+koje dalje rade DML, èime se okidaju drugi okidaèi ...
+
+
+5. Ako se desila greška na bazi koja nije obraðena, a poèetak je DML naredba, svi efekti
+se poništavaju (prethodna toèka).
+Ako se desila greška na bazi koja nije obraðena, a poèetak je poziv procedure (ili funkcije)
+sa Forms strane, ili strane druge baze (remote procedura), svi efekti procedure se poništavaju.
+Napomena: kroz SQL+ smo mogli obradom greške na SQL+ strani zadržati efekte, ali to
+kroz Forms ili poziv sa druge baze nije moguæe.
