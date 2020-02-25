@@ -1,0 +1,188 @@
+sudo mysql -h localhost -u root -p -> log in database
+pass -> baza2020
+---------------------------------------------------------------------------------
+CREATE DATABASE josip; -> create database josip
+---------------------------------------------------------------------------------
+USE josip; -> use josip database
+---------------------------------------------------------------------------------
+mysql> CREATE TABLE PERSON 
+    -> (
+    -> PersonID int, 
+    -> FirstName varchar(255),
+    -> LastName varchar(255),
+    -> Email varchar(255),
+    -> AddressLine varchar(255),
+    -> City varchar(255)
+    -> ); -> create table PERSON with values
+---------------------------------------------------------------------------------
+mysql> INSERT INTO PERSON
+    -> VALUES (1, 'MIKE', 'OLSEN', 'MIKEOLSEN@SQL.COM','LONDON FIRST','LONDON'); -> insert values into table PERSON
+---------------------------------------------------------------------------------
+mysql> INSERT INTO PERSON
+    -> VALUES (2, 'DAVID','JOHHANSON','DAVIDJOHH@SQL.COM','STOCKHOLM AND SWEDEN','GOTEBORG');
+---------------------------------------------------------------------------------
+mysql> INSERT INTO PERSON
+    -> VALUES (3, 'JOHN','CUSACK','JOHNCUSACK@GMAIL.COM','IVANA MAZURANICA','SPLIT');
+---------------------------------------------------------------------------------
+mysql> INSERT INTO PERSON
+    -> VALUES (4, 'ANNA','DAVIDSON','ANNADAVIDSON@GMAIL,COM','PUTINIJEVA','PAG');
+---------------------------------------------------------------------------------
+mysql> INSERT INTO PERSON
+    -> VALUES (5, 'JOSHUA','WOREST','JOSHUAWOREST@GMAIL.COM','UBUNTU','OSLO');
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM PERSON; -> display records from table PERSON
+---------------------------------------------------------------------------------
+mysql> ALTER TABLE PERSON
+    -> RENAME TO PEOPLE; -> change name of a table (from PERSON to PEOPLE)
+---------------------------------------------------------------------------------
+mysql> CREATE TABLE CARS 
+    -> (
+    -> Name varchar(255),
+    -> Model varcchar(255)
+    -> );
+---------------------------------------------------------------------------------
+mysql> INSERT INTO CARS
+    -> VALUES ('BMW','SERIES 3');
+---------------------------------------------------------------------------------
+mysql> INSERT INTO CARS VALUES ('FORD','FIESTA');
+---------------------------------------------------------------------------------
+mysql> CREATE DATABASE TEST;
+---------------------------------------------------------------------------------
+mysql> CREATE TABLE TEST
+    -> (
+    -> Name varchar(255),
+    -> Surname varchar(255)
+    -> );
+---------------------------------------------------------------------------------
+mysql> INSERT INTO TEST -> insert into TEST table
+    -> VALUES ('MIKE','MIKEY');
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM TEST; -> read from TEST table
+---------------------------------------------------------------------------------
+mysql> TRUNCATE TABLE TEST; -> faster than delete table command (same as DELETE)
+---------------------------------------------------------------------------------
+mysql> alter table PEOPLE
+    -> RENAME COLUMN PersonID to Personid; -> alter table = rename column
+---------------------------------------------------------------------------------
+mysql> select FirstName from PEOPLE; -> displays column FirstName from table PEOPLE
+---------------------------------------------------------------------------------
+mysql> select DISTINCT FirstName FROM PEOPLE; -> displays only first names from table PEOPLE
+---------------------------------------------------------------------------------
+mysql> select count(City) from PEOPLE; -> displays number of cities in table PEOPLE
+---------------------------------------------------------------------------------
+mysql> select count(*) from PEOPLE; -> displays number of records in table PEOPLE
+---------------------------------------------------------------------------------
+mysql> SELECT COUNT(DISTINCT City) FROM PEOPLE; -> returns number of cities in table PEOPLE
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM PEOPLE
+    -> LIMIT 3; -> selects first 3 records from table PEOPLE
+---------------------------------------------------------------------------------
+mysql> SELECT FirstName FROM PEOPLE
+    -> ORDER BY FirstName ASC
+    -> LIMIT 1; -> returns first value of the selected column.
+---------------------------------------------------------------------------------
+mysql> SELECT Email FROM PEOPLE
+    -> ORDER BY Email DESC
+    -> LIMIT 1; -> returns last value of selected column.
+---------------------------------------------------------------------------------
+mysql> SELECT FirstName FROM PEOPLE
+    -> ORDER BY RAND ()
+    -> LIMIT 2; -> returns random values from selected column.
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM PEOPLE WHERE City IN ('LONDON', 'OSLO'); -> returns values with certain names, used with SELECT, INSERT, UPDATE or DELETE.
+---------------------------------------------------------------------------------
+***JOIN TABLE/AS/DATE/SUM/WITH to do...
+
+---------------------------------------------------------------------------------
+
+mysql> CREATE TABLE SALARY ( ID int, EmployeeName varchar(255), Salary int );
+---------------------------------------------------------------------------------
+mysql> INSERT INTO SALARY
+    -> VALUES (1, 'JOHN', 50000);
+---------------------------------------------------------------------------------
+mysql> INSERT INTO SALARY
+    -> VALUES (2, 'ROBERT', 32000);
+---------------------------------------------------------------------------------
+mysql> INSERT INTO SALARY
+    -> VALUES (3, 'DAVID', 27000);
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM SALARY;
+---------------------------------------------------------------------------------
+mysql> RENAME TABLE SALARY TO PAYCHECK;
+---------------------------------------------------------------------------------
+SELECT SUM(Salary) FROM PAYCHECK; -> sums up column SALARY.
+---------------------------------------------------------------------------------
+mysql> SELECT Name FROM CARS WHERE Name = "BMW"; -> displays only fields with wanted condition.
+---------------------------------------------------------------------------------
+mysql> SELECT AddressLine, City FROM PEOPLE WHERE AddressLine = "UBUNTU" AND City = "OSLO"; -> same as before but with AND option.
+---------------------------------------------------------------------------------
+mysql> SELECT AddressLine, City FROM PEOPLE WHERE AddressLine = "UBUNTU" OR City = "OSLO"; -> same as before but with OR option, records are returned when any of the conditions is met.
+---------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
