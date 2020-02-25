@@ -1,5 +1,5 @@
 sudo mysql -h localhost -u root -p -> log in database
-pass -> baza2020
+pass -> /
 ---------------------------------------------------------------------------------
 CREATE DATABASE josip; -> create database josip
 ---------------------------------------------------------------------------------
