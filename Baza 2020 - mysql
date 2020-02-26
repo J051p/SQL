@@ -1,5 +1,5 @@
 sudo mysql -h localhost -u root -p -> log in database
-pass -> /
+pass -> baza2020
 ---------------------------------------------------------------------------------
 CREATE DATABASE josip; -> create database josip
 ---------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ mysql> SELECT FirstName FROM PEOPLE
 ---------------------------------------------------------------------------------
 mysql> SELECT * FROM PEOPLE WHERE City IN ('LONDON', 'OSLO'); -> returns values with certain names, used with SELECT, INSERT, UPDATE or DELETE.
 ---------------------------------------------------------------------------------
-***JOIN TABLE/AS/DATE/SUM/WITH to do...
+***JOIN TABLE/AS/DATE/SUM/WITH/COPY to do...
 
 ---------------------------------------------------------------------------------
 
@@ -118,6 +118,29 @@ mysql> SELECT AddressLine, City FROM PEOPLE WHERE AddressLine = "UBUNTU" AND Cit
 ---------------------------------------------------------------------------------
 mysql> SELECT AddressLine, City FROM PEOPLE WHERE AddressLine = "UBUNTU" OR City = "OSLO"; -> same as before but with OR option, records are returned when any of the conditions is met.
 ---------------------------------------------------------------------------------
+mysql> SELECT * FROM PAYCHECK ORDER BY EmployeeName, Salary; -> used for sorting data in ascending or descending order based on one or more columns. In this case it is EmployeeName and Salary.
+---------------------------------------------------------------------------------
+mysql> SELECT * FROM PEOPLE ORDER BY LastName DESC; -> sorting results in descending order by LastName from table PEOPLE.
+---------------------------------------------------------------------------------
+mysql> UPDATE CARS SET Model = 'Zmija' WHERE Name = 'FORD'; -> used to modify the data that is already in database, in this case we are updating Model from Fiesta to Zmija (WHERE).
+---------------------------------------------------------------------------------
+mysql> UPDATE PEOPLE SET FirstName = 'JOSH', LastName = 'JOHNSON' WHERE Personid = '5'; -> same as before but updating multiple data.
+---------------------------------------------------------------------------------
+mysql> DELETE FROM PEOPLE WHERE Personid = '5'; -> deletes record with wanted condition. TRUNCATE statement is used to delete all rows and free the containing space. DROP deletes the table's rows with the table's definition so all relationships of that table will no longer be available.
+---------------------------------------------------------------------------------
+
+
+
+
+
+
+
+ 
+
+
+
+
+
 
 
 
