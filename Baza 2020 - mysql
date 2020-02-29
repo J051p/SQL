@@ -127,7 +127,10 @@ mysql> UPDATE PEOPLE SET FirstName = 'JOSH', LastName = 'JOHNSON' WHERE Personid
 ---------------------------------------------------------------------------------
 mysql> DELETE FROM PEOPLE WHERE Personid = '5'; -> deletes record with wanted condition. TRUNCATE statement is used to delete all rows and free the containing space. DROP deletes the table's rows with the table's definition so all relationships of that table will no longer be available.
 ---------------------------------------------------------------------------------
-
+mysql> DELETE FROM PAYCHECK WHERE ID = 3; -> deletes row from table PAYCHECK where ID is 3.
+---------------------------------------------------------------------------------
+mysql> DELETE FROM PAYCHECK; -> deletes all rows from table PAYCHECK.
+---------------------------------------------------------------------------------
 
 
 
